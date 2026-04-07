@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: eureka-server
+
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false   # o servidor não se registra nele mesmo
+    fetch-registry: false         # o servidor não busca registros de outros
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    wait-time-in-ms-when-sync-empty: 0  # acelera inicialização em dev
+
+logging:
+  level:
+    root: INFO
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN

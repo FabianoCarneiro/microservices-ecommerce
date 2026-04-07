@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: products-service
+          uri: lb://products-service
+          predicates:
+            - Path=/products/**
+        - id: orders-service
+          uri: lb://orders-service
+          predicates:
+            - Path=/orders/**
+        - id: payments-service
+          uri: lb://payments-service
+          predicates:
+            - Path=/payments/**
+  discovery:
+    client:
+      registration:
+        eureka:
+          enabled: true
+      service-url:
+        defaultZone: http://localhost:8761/eureka/
