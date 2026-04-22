@@ -2,6 +2,7 @@ package com.example.products.service;
 
 import com.example.products.model.Product;
 import com.example.products.repository.ProductRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,16 +17,26 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
+    @CircuitBreaker(name = "products", fallbackMethod = "findAllFallback")
     public List<Product> findAll() {
         return productRepository.findAll();
+    }
+
+    public List<Product> findAllFallback(Exception e) {
+        return List.of();
     }
 
     public Optional<Product> findById(Long id) {
         return productRepository.findById(id);
     }
 
+    @CircuitBreaker(name = "products", fallbackMethod = "saveFallback")
     public Product save(Product product) {
         return productRepository.save(product);
+    }
+
+    public Product saveFallback(Product product, Exception e) {
+        throw new RuntimeException("Product service temporarily unavailable", e);
     }
 
     public Product update(Long id, Product updated) {

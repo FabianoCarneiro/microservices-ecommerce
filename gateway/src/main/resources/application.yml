@@ -8,6 +8,11 @@ spring:
           uri: http://localhost:8081
           predicates:
             - Path=/products,/products/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: products
+                fallbackUri: forward:/fallback
         - id: orders-service
           uri: lb://ORDERS-SERVICE
           predicates:
