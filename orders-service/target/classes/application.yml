@@ -12,9 +12,12 @@ spring:
       path: /h2-console
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+      ddl-auto: create
+    show-sql: false
     database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: true
 
 server:
   port: 8082
@@ -26,4 +29,5 @@ eureka:
 
 logging:
   level:
-    root: INFO
+    root: WARN
+    org.springframework.web: INFO

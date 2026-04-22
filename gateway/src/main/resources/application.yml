@@ -3,22 +3,34 @@ spring:
     name: gateway
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
       routes:
         - id: products-service
           uri: lb://products-service
           predicates:
             - Path=/products/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: products
+                fallbackUri: forward:/fallback
         - id: orders-service
           uri: lb://orders-service
           predicates:
             - Path=/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orders
+                fallbackUri: forward:/fallback
         - id: payments-service
           uri: lb://payments-service
           predicates:
             - Path=/payments/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: payments
+                fallbackUri: forward:/fallback
 
 server:
   port: 8080
@@ -30,5 +42,6 @@ eureka:
 
 logging:
   level:
-    root: INFO
-    org.springframework.cloud.gateway: DEBUG
+    root: WARN
+    org.springframework.web: INFO
+    org.springframework.cloud.gateway.route: DEBUG
