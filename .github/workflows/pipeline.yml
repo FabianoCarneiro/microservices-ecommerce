@@ -82,18 +82,19 @@ jobs:
 
           # Start Eureka
           nohup java -jar eureka-server-1.0.0.jar > eureka.log 2>&1 &
-
+          sleep 2
+          
           # Aguarda Eureka subir
-          for i in {1..30}; do
-            if nc -z localhost 8761; then break; fi
-            sleep 1
-          done
+          # for i in {1..30}; do
+          #  if nc -z localhost 8761; then break; fi
+          #  sleep 1
+          # done
 
           # Start services
           nohup java -jar products-service-1.0.0.jar > products.log 2>&1 &
           nohup java -jar orders-service-1.0.0.jar > orders.log 2>&1 &
           nohup java -jar payments-service-1.0.0.jar > payments.log 2>&1 &
-
+          
           sleep 3
 
           # Start gateway
