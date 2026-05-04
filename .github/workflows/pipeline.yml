@@ -39,32 +39,19 @@ jobs:
     - name: Build with Maven
       run: mvn -B clean package -DskipTests
 
+    - name: List generated JARs (debug)
+      run: find . -name "*.jar" -type f | grep -E "target.*1.0.0.jar$"
+
     - name: Upload JARs to Azure VM
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.AZURE_VM_HOST }}
         username: ${{ secrets.AZURE_VM_USER }}
         key: ${{ secrets.AZURE_VM_SSH_KEY }}
-        source: |
-          eureka-server/target/eureka-server-1.0.0.jar
-          products-service/target/products-service-1.0.0.jar
-          orders-service/target/orders-service-1.0.0.jar
-          payments-service/target/payments-service-1.0.0.jar
-          gateway/target/gateway-1.0.0.jar
-        # target: ~/microservices-ecommerce/
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
+        source: "eureka-server/target/eureka-server-1.0.0.jar,products-service/target/products-service-1.0.0.jar,orders-service/target/orders-service-1.0.0.jar,payments-service/target/payments-service-1.0.0.jar,gateway/target/gateway-1.0.0.jar"
+        target: "~/microservices-ecommerce"
+        strip_components: 2
 
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    
     - name: Start Java apps on Azure VM
       uses: appleboy/ssh-action@v1
       with:
@@ -72,6 +59,7 @@ jobs:
         username: ${{ secrets.AZURE_VM_USER }}
         key: ${{ secrets.AZURE_VM_SSH_KEY }}
         script: |
+          mkdir -p ~/microservices-ecommerce
           cd ~/microservices-ecommerce
 
           # Kill old apps if running
