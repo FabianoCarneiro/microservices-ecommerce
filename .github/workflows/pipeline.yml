@@ -51,7 +51,7 @@ jobs:
           orders-service/target/orders-service-1.0.0.jar
           payments-service/target/payments-service-1.0.0.jar
           gateway/target/gateway-1.0.0.jar
-        target: ~/microservices-ecommerce/
+        # target: ~/microservices-ecommerce/
   deploy:
     needs: build
     runs-on: ubuntu-latest
