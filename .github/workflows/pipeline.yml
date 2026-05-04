@@ -37,4 +37,69 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B clean package -DskipTests
+
+    - name: Upload JARs to Azure VM
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.AZURE_VM_HOST }}
+        username: ${{ secrets.AZURE_VM_USER }}
+        key: ${{ secrets.AZURE_VM_SSH_KEY }}
+        source: |
+          eureka-server/target/eureka-server-1.0.0.jar
+          products-service/target/products-service-1.0.0.jar
+          orders-service/target/orders-service-1.0.0.jar
+          payments-service/target/payments-service-1.0.0.jar
+          gateway/target/gateway-1.0.0.jar
+        target: ~/microservices-ecommerce/
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Start Java apps on Azure VM
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.AZURE_VM_HOST }}
+        username: ${{ secrets.AZURE_VM_USER }}
+        key: ${{ secrets.AZURE_VM_SSH_KEY }}
+        script: |
+          cd ~/microservices-ecommerce
+
+          # Kill old apps if running
+          pkill -f 'eureka-server-1.0.0.jar' || true
+          pkill -f 'products-service-1.0.0.jar' || true
+          pkill -f 'orders-service-1.0.0.jar' || true
+          pkill -f 'payments-service-1.0.0.jar' || true
+          pkill -f 'gateway-1.0.0.jar' || true
+          sleep 2
+
+          # Start Eureka
+          nohup java -jar eureka-server-1.0.0.jar > eureka.log 2>&1 &
+
+          # Aguarda Eureka subir
+          for i in {1..30}; do
+            if nc -z localhost 8761; then break; fi
+            sleep 1
+          done
+
+          # Start services
+          nohup java -jar products-service-1.0.0.jar > products.log 2>&1 &
+          nohup java -jar orders-service-1.0.0.jar > orders.log 2>&1 &
+          nohup java -jar payments-service-1.0.0.jar > payments.log 2>&1 &
+
+          sleep 3
+
+          # Start gateway
+          nohup java -jar gateway-1.0.0.jar > gateway.log 2>&1 &
+
+          # Opcional: mostrar processos rodando
+          pgrep -af 'java -jar'
