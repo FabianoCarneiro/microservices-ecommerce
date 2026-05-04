@@ -15,10 +15,19 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  UnitTests:
 
     runs-on: ubuntu-latest
 
+    steps:
+    - uses: actions/checkout@v4
+    - name: Tests with Maven
+      run: mvn test
+  
+  build:
+    needs: UnitTests
+    runs-on: ubuntu-latest
+    
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
