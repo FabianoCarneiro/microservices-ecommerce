@@ -51,6 +51,16 @@ jobs:
         source: "eureka-server/target/eureka-server-1.0.0.jar,products-service/target/products-service-1.0.0.jar,orders-service/target/orders-service-1.0.0.jar,payments-service/target/payments-service-1.0.0.jar,gateway/target/gateway-1.0.0.jar"
         target: "~/microservices-ecommerce"
         strip_components: 2
+   
+    - name: List JARs on VM
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.AZURE_VM_HOST }}
+        username: ${{ secrets.AZURE_VM_USER }}
+        key: ${{ secrets.AZURE_VM_SSH_KEY }}
+        script: |
+          ls -lh ~/microservices-ecommerce/
+          java -version
 
     - name: Start Java apps on Azure VM
       uses: appleboy/ssh-action@v1
@@ -92,12 +102,3 @@ jobs:
           # Opcional: mostrar processos rodando
           pgrep -af 'java -jar'
 
-    - name: List JARs on VM
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ secrets.AZURE_VM_HOST }}
-        username: ${{ secrets.AZURE_VM_USER }}
-        key: ${{ secrets.AZURE_VM_SSH_KEY }}
-        script: |
-          ls -lh ~/microservices-ecommerce/
-          java -version
