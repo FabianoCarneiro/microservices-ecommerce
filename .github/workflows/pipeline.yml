@@ -91,3 +91,13 @@ jobs:
 
           # Opcional: mostrar processos rodando
           pgrep -af 'java -jar'
+
+    - name: List JARs on VM
+      uses: appleboy/ssh-action@v1
+      with:
+        host: ${{ secrets.AZURE_VM_HOST }}
+        username: ${{ secrets.AZURE_VM_USER }}
+        key: ${{ secrets.AZURE_VM_SSH_KEY }}
+        script: |
+          ls -lh ~/microservices-ecommerce/
+          java -version
